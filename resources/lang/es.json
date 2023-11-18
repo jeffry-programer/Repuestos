@@ -1,0 +1,23 @@
+{
+    "name" : "nombre",
+    "created_at" : "fecha de creación",
+    "description" : "descripción",
+    "actions" : "acciones",
+    "Add new" : "Agregar",
+    "Search" : "Buscar",
+    "No records available" : "No se consiguieron registros",
+    "No matching records found" : "No conseguimos registros que coincidieran",
+    "filtered from" : "filtrado de",
+    "total entries" : "total de entradas",
+    "Showing" : "Mostrando",
+    "entries" : "entradas",
+    "Previous" : "Anterior",
+    "Next" : "Siguiente",
+    "to" : "a",
+    "of" : "de",
+    "Close" : "Cerrar",
+    "Save changes" : "Guardar cambios",
+    "enter a" : "Ingrese el campo",
+    "Edit" : "Editar",
+    "countries_id" : "Pais"
+}

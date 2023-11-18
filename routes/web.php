@@ -50,6 +50,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/static-sign-up', StaticSignUp::class)->name('static-sign-up');
     Route::get('/rtl', Rtl::class)->name('rtl');
     Route::get('/laravel-user-profile', UserProfile::class)->name('user-profile');
-    Route::get('/laravel-user-management', UserManagement::class)->name('user-management');
+    Route::get('/table-management/{label}', UserManagement::class)->name('/table-management/{label}');
+    Route::post('table-store', [UserManagement::class, 'store'])->name('table-store');
+    Route::post('table-update', [UserManagement::class, 'update'])->name('table-update');
+    Route::post('delete-register', [UserManagement::class, 'delete'])->name('delete-register');
 });
 

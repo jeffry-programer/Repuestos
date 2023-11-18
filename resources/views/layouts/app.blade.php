@@ -12,7 +12,7 @@
             {{ $slot }}
             @include('layouts.footers.guest.description')
         @elseif (in_array(request()->route()->getName(),['profile', 'my-profile'],))
-            @include('layouts.navbars.auth.sidebar')
+            @livewire('side-bar')
             <div class="main-content position-relative bg-gray-100">
                 @include('layouts.navbars.auth.nav-profile')
                 <div>
@@ -22,8 +22,8 @@
             </div>
             @include('components.plugins.fixed-plugin')
         @else
-            @include('layouts.navbars.auth.sidebar')
-            @include('layouts.navbars.auth.nav')
+        @livewire('side-bar')
+        @include('layouts.navbars.auth.nav')
             @include('components.plugins.fixed-plugin')
             {{ $slot }}
             <main>

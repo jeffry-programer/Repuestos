@@ -21753,7 +21753,7 @@ hr.horizontal.gray-light {
   background-color: #fff;
 }
 .navbar-vertical .navbar-nav > .nav-item .nav-link.active .icon {
-  background-image: linear-gradient(310deg, #f53939 0%, #f53939 100%);
+  background-image: linear-gradient(310deg, #c8c8c8 0%, #73e4f0 100%);
 }
 .navbar-vertical .navbar-nav > .nav-item .nav-link.active .icon svg .color-background,
 .navbar-vertical .navbar-nav > .nav-item .nav-link.active .icon svg .color-foreground {
