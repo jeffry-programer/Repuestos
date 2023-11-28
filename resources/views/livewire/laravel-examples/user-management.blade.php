@@ -220,7 +220,7 @@
           <h1 class="modal-title fs-5" id="exampleModalLabel">{{__('Edit')}}</h1>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <form action="{{route('table-update')}}" method="POST"  autocomplete="off">
+        <form action="{{route('table-update')}}" method="POST"  autocomplete="off" id="form-edit">
             @csrf
         <div class="modal-body">
             <div class="card" style="width: 74%;left: 16%;">
@@ -258,9 +258,15 @@
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{__('Close')}}</button>
-            <button type="submit" class="btn btn-info">{{__('Save changes')}}</button>
+            <button 
+            @if(isset($image))
+                type="button" id="update"
+            @else
+                type="submit"
+            @endif
+            class="btn btn-info">{{__('Save changes')}}</button>
         </div>
-        <input type="hidden" name="label" value="{{$label}}">
+        <input type="hidden" name="label" value="{{$label}}" id="label">
         <input type="hidden" name="id" id="id">
         </form>
       </div>
@@ -342,10 +348,8 @@
                 arrayImagenes.forEach((key) => {
                     if(key != ''){
                         key = key.replaceAll('/storage','storage');
-                        plantilla += `<div class="col-12 col-md-4" style="position: relative;margin-top: 1rem;">
-                                <img src="{{asset('${key}')}}" style="width: 9.5rem;height: 6.5rem;" alt="">
-                                <a href="#"><img src="{{asset('/storage/x.png')}}" alt="" style="position: absolute;width: 1rem;left: 9.25rem;"></a>
-                            </div>`;
+                        nameImg = key;
+                        plantilla += `<div class="col-12 col-md-4" style="position: relative;margin-top: 1rem;"><img src="{{asset('${nameImg}')}}" style="width: 9.5rem;height: 6.5rem;" alt=""><a style="cursor:pointer" onclick="deleteImg('${nameImg}');"><img src="{{asset('/storage/x.png')}}" alt="" style="position: absolute;width: 1rem;left: 9.25rem;"></a></div>`;
                     }
                 });
                 $("#row-img-update").html(plantilla);
@@ -361,6 +365,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/dropzone.min.js" integrity="sha512-U2WE1ktpMTuRBPoCFDzomoIorbOyUv0sP8B+INA3EzNAhehbzED1rOJg6bCqPf/Tuposxb5ja/MAUnC8THSbLQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script>
         Dropzone.autoDiscover = false;
+
+        var isset_images = false;
 
         let myDropzone = new Dropzone("#myDropzone", { 
             url: "{{route('imgs-store')}}",
@@ -385,6 +391,7 @@
                         return false;
                     }
                     if(this.getUploadingFiles().length === 0){
+                        isset_images = true;
                         hideAlertTime();
                     }
                 });
@@ -405,25 +412,86 @@
             parallelUploads: 5,
             init: function(){
                 this.on("sending", function(file, xhr, formData){
-                    formData.append("id", `${$("#id_table").val()}`);
+                    formData.append("id", `${$("#id").val()}`);
                     formData.append("table", `${$("#table").val()}`);
                 });
+
+                this.on("addedfile",  function(file) {
+                    console.log("A file has been added");
+                });
+
 
                 this.on("success", function(file, response) {
                     if(file.status != 'success'){
                         return false;
                     }
                     if(this.getUploadingFiles().length === 0){
-                        hideAlertTime();
+                        isset_images = true;
+                        hideAlertTime2();
                     }
                 });
             }
         });
 
         $("#store").click((e) => {
+            validateDataStore();
+        });
+
+        $("#update").click((e) => {
+            validateDataUpdate();
+        });
+
+        function validateDataStore(){
+            var data = $("#form").serialize().split('&');
+            var boolean = true;
+            data.forEach((key) => {
+                let value = key.split('=')[1];
+                let field = key.split('=')[0];
+                if(value == null || value == ''){
+                    boolean = false;
+                }
+            });
+
+            if(!boolean){
+                Swal.fire({
+                    title: "Todos los campos son requeridos",
+                    icon: "error",
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false
+                });
+                return false;
+            } 
+            
             showAlertTime();
             storeData();
-        });
+        }
+
+        function validateDataUpdate(){
+            var data = $("#form-edit").serialize().split('&');
+            var boolean = true;
+            data.forEach((key) => {
+                let value = key.split('=')[1];
+                let field = key.split('=')[0];
+                if(value == null || value == ''){
+                    boolean = false;
+                }
+            });
+
+            if(!boolean){
+                Swal.fire({
+                    title: "Todos los campos son requeridos",
+                    icon: "error",
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false
+                });
+                return false;
+            } 
+            
+            showAlertTime();
+            updateData();
+        }
 
         function showAlertTime(){
             Swal.fire({
@@ -436,7 +504,7 @@
                 },
             });
         }
-
+        
         function hideAlertTime(){
             setTimeout(() => {
                 window.location.reload();
@@ -452,6 +520,21 @@
             });
         }
 
+        function hideAlertTime2(){
+            setTimeout(() => {
+                window.location.reload();
+            }, 3000);
+
+            Swal.fire({
+                toast: true,
+                position: 'center',
+                icon: 'success',
+                showConfirmButton: false,
+                title: "Registro editado exitosamente!!",
+                timer: 3000
+            });
+        }
+
         function storeData(){
             $.ajax({
                 url: "{{route('table-store-imgs')}}",
@@ -462,6 +545,11 @@
                     $("#id_table").val(res.split('-')[1]);
                     $("#table").val(res.split('-')[0]);
                     myDropzone.processQueue();
+                    setTimeout(() => {
+                        if(isset_images == false){
+                            hideAlertTime();
+                        }
+                    }, 3000);
                 },error(err){
                     Swal.fire({
                         toast: true,
@@ -472,6 +560,70 @@
                         timer: 3000
                     });
                     return false;
+                }
+            });
+        }
+
+        function updateData(){
+            $.ajax({
+                url: "{{route('update-store-imgs')}}",
+                data: $("#form-edit").serialize(),
+                method: "POST",
+                success(response){
+                    var res = JSON.parse(response);
+                    $("#id_table").val(res.split('-')[1]);
+                    $("#table").val(res.split('-')[0]);
+                    myDropzone2.processQueue();
+                    setTimeout(() => {
+                        if(isset_images == false){
+                            hideAlertTime2();
+                        }
+                    }, 3000);
+                },error(err){
+                    Swal.fire({
+                        toast: true,
+                        position: 'center',
+                        icon: 'error',
+                        showConfirmButton: false,
+                        title: "Ups ha ocurrido un error",
+                        timer: 3000
+                    });
+                    return false;
+                }
+            });
+        }
+
+        function deleteImg(nameImg){
+            Swal.fire({
+                title: "¿Seguro que quieres eliminar esta imagen?",
+                showCancelButton: true,
+                confirmButtonText: "Confirmar",
+                cancelButtonText: `Cancelar`
+            }).then((result) => {
+                if (result.isConfirmed){
+                    deleteImgDb(nameImg);
+                }
+            });
+        }
+
+        function deleteImgDb(nameImg){
+            $.ajax({
+                url: "{{route('delete-img')}}",
+                data: {_token : "{{csrf_token()}}", nameImg: nameImg.replaceAll('storage','/storage'), id: $("#id").val(), label: $("#label").val()},
+                method: 'POST',
+                success(response){
+                    var plantilla = $("#row-img-update").html();
+                    var plantillaRemplazar = `<div class="col-12 col-md-4" style="position: relative;margin-top: 1rem;"><img src="{{asset('${nameImg}')}}" style="width: 9.5rem;height: 6.5rem;" alt=""><a style="cursor:pointer" onclick="deleteImg('${nameImg}');"><img src="{{asset('/storage/x.png')}}" alt="" style="position: absolute;width: 1rem;left: 9.25rem;"></a></div>`;
+                    plantilla = plantilla.replaceAll(plantillaRemplazar, '');
+                    $("#row-img-update").html(plantilla);
+                    $("#row-img-update").show();
+                    Swal.fire({
+                        title: "Imágen eliminada exitosamente",
+                        showCancelButton: true,
+                        icon: 'success',
+                        confirmButtonText: "Aceptar",
+                        cancelButtonText: `Cancelar`
+                    });
                 }
             });
         }

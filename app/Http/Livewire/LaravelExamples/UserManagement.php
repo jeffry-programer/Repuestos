@@ -9,9 +9,9 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
+use lluminate\Filesystem\Filesystem;
 
 class UserManagement extends Component
 {
@@ -129,6 +129,11 @@ class UserManagement extends Component
         $name_table = Table::where('label', $request->label)->first()->name;
         $query = "delete from $name_table where id = $request->id";
         DB::delete($query);
+        if($name_table == 'products'){
+            AditionalPicturesProduct::where('products_id', $request->id)->delete();
+            $pathDirectory = "public/images-prod/$request->id";
+            Storage::deleteDirectory($pathDirectory);
+        }
         session()->flash('message', 'Registro eliminado exitosamente!!');
         return redirect('/table-management/'.str_replace(' ','_', $request->label));
     }
@@ -155,6 +160,29 @@ class UserManagement extends Component
         return redirect('/table-management/'.str_replace(' ','_', $request->label));
     }
 
+    public function update2(Request $request){
+        $name_table = Table::where('label', $request->label)->first()->name;
+        $atributes = Schema::getColumnListing($name_table);
+        $data = $request->all();
+        $query = 'update '.$name_table. ' set ';
+        $count = 0;
+        foreach($atributes as $field){
+            if($field != 'created_at' && $field != 'updated_at' && $field != 'id'){
+                if($count == 0){
+                    $query .= "$field = '".$data[$field]."' ";
+                }else{
+                    if($field !== 'image'){
+                        $query .= ", $field = '".$data[$field]."' ";
+                    }
+                }
+                $count++;
+            }
+        }
+        $query .= "where id = $request->id";
+        DB::update($query);
+        return json_encode($name_table.'-'.$request->id);
+    }
+
     public function saveImgs(Request $request){
         $request->validate([
             'file' => 'required|image|max:2048'
@@ -178,7 +206,16 @@ class UserManagement extends Component
         }
     }
 
-    public function updateImgs(Request $request){
-
-    }
+    public function deleteImg(Request $request){
+        $name_table = Table::where('label', $request->label)->first()->name;
+        $image = DB::table($name_table)->find($request->id)->image;
+        if($image == $request->nameImg){
+            $query = "update $name_table set image = '' where id = $request->id";
+            DB::update($query);
+        }else{
+            AditionalPicturesProduct::where('image',$request->nameImg)->delete();
+        }
+        $request->nameImg = str_replace('/storage', 'public', $request->nameImg);
+        Storage::delete($request->nameImg);
+    }       
 }
