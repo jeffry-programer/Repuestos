@@ -54,5 +54,8 @@ Route::middleware('auth')->group(function () {
     Route::post('table-store', [UserManagement::class, 'store'])->name('table-store');
     Route::post('table-update', [UserManagement::class, 'update'])->name('table-update');
     Route::post('delete-register', [UserManagement::class, 'delete'])->name('delete-register');
+    Route::post('imgs-store', [UserManagement::class, 'saveImgs'])->name('imgs-store');
+    Route::post('table-store-imgs', [UserManagement::class, 'store2'])->name('table-store-imgs');
+    Route::post('imgs-update', [UserManagement::class, 'updateImgs'])->name('imgs-update');
 });
 

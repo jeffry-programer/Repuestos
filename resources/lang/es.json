@@ -19,5 +19,20 @@
     "Save changes" : "Guardar cambios",
     "enter a" : "Ingrese el campo",
     "Edit" : "Editar",
-    "countries_id" : "Pais"
+    "countries_id" : "Pais",
+    "states_id" : "Estado",
+    "municipalities_id" : "Municipio",
+    "categories_id" : "Categorias",
+    "sub_categories_id" : "Sub categoria",
+    "cylinder_capacities_id" : "Cilindraje",
+    "models_id" : "Modulos",
+    "boxes_id" : "Caja",
+    "type_products_id" : "Tipo producto",
+    "brands_id" : "Marca",
+    "image" : "Imagen",
+    "count" : "Contador",
+    "reference" : "Referencia",
+    "code" : "Codigo",
+    "detail" : "Detalle",
+    "images" : "Imagenes"
 }

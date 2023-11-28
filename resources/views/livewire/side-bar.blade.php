@@ -52,7 +52,7 @@
                         <i style="font-size: 1rem;" class="fas fa-lg fa-list-ul ps-2 pe-2 text-center
                         {{ in_array(request()->route()->getName(),['user-management']) ? 'text-white' : 'text-dark' }}"></i>
                     </div>
-                    <span class="nav-link-text ms-1">{{__('Tablas relacionales')}}</span>
+                    <span class="nav-link-text ms-1">{{__('Productos')}}</span>
                 </a>
             </li>
 

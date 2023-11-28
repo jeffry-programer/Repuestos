@@ -27,6 +27,8 @@
     <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js" defer></script>
     @livewireStyles
 
+    @yield('css')
+
 </head>
 
 <body class="g-sidenav-show bg-gray-100">
@@ -48,6 +50,7 @@
     <script async defer src="https://buttons.github.io/buttons.js"></script>
     <!-- Control Center for Soft Dashboard: parallax effects, scripts for the example pages etc -->
     @livewireScripts
+    @yield('js')
 </body>
 
 </html>
