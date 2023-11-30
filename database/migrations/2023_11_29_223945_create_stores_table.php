@@ -11,22 +11,20 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('products', function (Blueprint $table) {
+        Schema::create('stores', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('sub_categories_id');
-            $table->foreignId('cylinder_capacities_id');
-            $table->foreignId('models_id');
-            $table->foreignId('boxes_id');
-            $table->foreignId('type_products_id');
-            $table->foreignId('brands_id');
+            $table->foreignId('subscriptions_id');
+            $table->foreignId('type_stores_id');
+            $table->foreignId('users_id');
+            $table->foreignId('cities_id');
             $table->string('name', 45);
             $table->string('description', 100);
-            $table->string('code', 45);
+            $table->string('email', 45)->unique();
+            $table->string('address');
             $table->string('image');
-            $table->integer('count');
+            $table->string('image2');
             $table->string('link');
-            $table->string('reference', 30);
-            $table->text('detail');
+            $table->boolean('status');
             $table->timestamps();
         });
     }
@@ -36,6 +34,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('products');
+        Schema::dropIfExists('stores');
     }
 };

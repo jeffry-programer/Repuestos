@@ -50,7 +50,7 @@
                             <thead>
                                 <tr>
                                     @foreach ($atributes as $field)
-                                        @if($field != 'updated_at')
+                                        @if($field != 'updated_at' && $field != 'email_verified_at' && $field != 'remember_token' && $field != 'about')
                                             <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
                                                 {{__($field)}}
                                             </th>
@@ -65,7 +65,7 @@
                                 @foreach ($data as $key)
                                     <tr>
                                         @foreach ($atributes as $field)
-                                            @if($field != 'updated_at')
+                                            @if($field != 'updated_at' && $field != 'email_verified_at' && $field != 'remember_token' && $field != 'about')
                                                 @if(str_contains($field, '_id'))
                                                     @foreach ($extra_data[$field]['values'] as $value)
                                                         @foreach ($extra_data[$field]['fields'] as $field2)
@@ -78,6 +78,13 @@
                                                             @endif
                                                         @endforeach
                                                     @endforeach
+                                                @elseif((str_contains($field, 'hour')))
+                                                    <?php 
+                                                        $key->$field = date('H:i', strtotime($key->$field));
+                                                    ?>
+                                                    <td class="ps-4">
+                                                        <p class="text-xs font-weight-bold mb-0">{{$key->$field}}</p>
+                                                    </td> 
                                                 @else
                                                     <td class="ps-4">
                                                         <p class="text-xs font-weight-bold mb-0">{{$key->$field}}</p>
@@ -150,6 +157,10 @@
 
 </div>
 
+<?php $maxFiles = $label == 'Productos' ? '5' : '1' ?>
+
+<input type="hidden" id="maxFiles" value="<?php echo $maxFiles; ?>">
+
   <!-- Modal -->
   <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
@@ -161,10 +172,10 @@
         <div class="modal-body">
             <div class="card" style="width: 72%;left: 16%;">
                 <div class="card-body">
-                    <form action="{{route('table-store')}}" method="POST" autocomplete="off" id="form">
+                    <form action="{{route('table-store')}}" method="POST" autocomplete="off" id="form" autocomplete="off">
                     @csrf
                     @foreach ($atributes as $field)
-                        @if($field != 'created_at' && $field != 'updated_at' && $field != 'id')
+                        @if($field != 'created_at' && $field != 'updated_at' && $field != 'id' && $field != 'email_verified_at' && $field != 'remember_token' && $field != 'about')
                             @if(str_contains($field, '_id'))
                                 <label for="">{{__($field)}}</label>
                                 <select class="form-select" name="{{$field}}">
@@ -176,11 +187,32 @@
                                         @endforeach
                                     @endforeach
                                 </select>
+                            @elseif($field == 'password')
+                                <label>{{__($field)}}</label>
+                                <input type="password" name="{{$field}}" required class="form-control" placeholder="{{__('enter a')}} {{__($field)}}">
                             @elseif($field == 'image')
                                 <?php $image = true; ?>
+                            @elseif($field == 'gender')
+                                <label>{{__($field)}}</label>
+                                <select name="{{$field}}" class="form-select">
+                                    <option value="M">M</option>
+                                    <option value="F">F</option>
+                                </select>
+                            @elseif($field == 'status')
+                                <label>{{__($field)}}</label>
+                                <select name="{{$field}}" class="form-select">
+                                    <option value="1">Activo</option>
+                                    <option value="0">Inactivo</option>
+                                </select>
+                            @elseif($field == 'phone')
+                                <label>{{__($field)}}</label>
+                                <input type="number" name="{{$field}}" required class="form-control" placeholder="{{__('enter a')}} {{__($field)}}">
                             @elseif($field == 'count')
                                 <label class="d-none">{{__($field)}}</label>
                                 <input type="number" name="{{$field}}" required class="form-control d-none" value="0">
+                            @elseif((str_contains($field, 'hour')))
+                                <label>{{__($field)}}</label>
+                                <input type="time" name="{{$field}}" class="form-control">
                             @else
                                 <label for="">{{__($field)}}</label>
                                 <input type="text" name="{{$field}}" required class="form-control" placeholder="{{__('enter a')}} {{__($field)}}">
@@ -226,7 +258,7 @@
             <div class="card" style="width: 74%;left: 16%;">
                 <div class="card-body">
                     @foreach ($atributes as $field)
-                        @if($field != 'created_at' && $field != 'updated_at' && $field != 'id')
+                        @if($field != 'created_at' && $field != 'updated_at' && $field != 'id' && $field != 'email_verified_at' && $field != 'remember_token' && $field != 'about')
                             @if(str_contains($field, '_id'))
                                 <label for="">{{__($field)}}</label>
                                 <select class="form-select" name="{{$field}}" id="{{$field}}">
@@ -238,12 +270,21 @@
                                         @endforeach
                                     @endforeach
                                 </select>
-                            @elseif($field == 'image')
-                                <?php $image = true; ?>
-                            @else
-                                <label for="">{{__($field)}}</label>
-                                <input type="text" name="{{$field}}" id="{{$field}}" required class="form-control" placeholder="{{__('enter a')}} {{__($field)}}">
-                            @endif
+                                @elseif($field == 'password')
+                                    <label>{{__($field)}}</label>
+                                    <input type="password" id="{{$field}}" name="{{$field}}" class="form-control" placeholder="Ingrese solo si desea cambiarla">
+                                @elseif($field == 'image')
+                                    <?php $image = true; ?>
+                                @elseif($field == 'phone')
+                                    <label>{{__($field)}}</label>
+                                    <input type="number" name="{{$field}}" id="{{$field}}" required class="form-control">
+                                @elseif((str_contains($field, 'hour')))
+                                    <label>{{__($field)}}</label>
+                                    <input type="time" name="{{$field}}" id="{{$field}}" class="form-control">
+                                @else
+                                    <label for="">{{__($field)}}</label>
+                                    <input type="text" name="{{$field}}" id="{{$field}}" required class="form-control" placeholder="{{__('enter a')}} {{__($field)}}">
+                                @endif
                         @endif
                     @endforeach
                     @isset($image)
@@ -331,18 +372,18 @@
         function editUser(array){
             fields = array[0].split("|");
             array.shift();
-            if(array.at(-1).includes('images:')){
-                var arrayImagenes = [];
-            }
+            var arrayImagenes = [];
             fields.forEach((key, index) => {
                 if(key.includes('image')){
                     arrayImagenes.push(array[index]);
+                }else if(key.includes('password')){
+
                 }else{
                     $(`#${key}`).val(array[index]);
                 }
             });
 
-            if(array.at(-1).includes('images:')){
+            if(arrayImagenes.length > 0){
                 var arrayImagenes = arrayImagenes.concat(array.at(-1).replaceAll('images:','').split('|'));
                 var plantilla = '';
                 arrayImagenes.forEach((key) => {
@@ -376,7 +417,7 @@
             dictDefaultMessage: "Arrastre o haga click para agregar imágenes",
             acceptedFiles: 'image/*',
             maxFilesize : 5,
-            maxFiles: 5,
+            maxFiles: $("#maxFiles").val(),
             autoProcessQueue: false,
             addRemoveLinks: true,
             parallelUploads: 5,
@@ -406,7 +447,7 @@
             dictDefaultMessage: "Arrastre o haga click para agregar imágenes",
             acceptedFiles: 'image/*',
             maxFilesize : 5,
-            maxFiles: 5,
+            maxFiles: $("#maxFiles").val(),
             autoProcessQueue: false,
             addRemoveLinks: true,
             parallelUploads: 5,
@@ -454,7 +495,7 @@
 
             if(!boolean){
                 Swal.fire({
-                    title: "Todos los campos son requeridos",
+                    title: "Campos ingresados no válidos",
                     icon: "error",
                     toast: true,
                     position: 'top-end',
@@ -473,8 +514,10 @@
             data.forEach((key) => {
                 let value = key.split('=')[1];
                 let field = key.split('=')[0];
-                if(value == null || value == ''){
-                    boolean = false;
+                if(field != 'password'){
+                    if(value == null || value == ''){
+                        boolean = false;
+                    }
                 }
             });
 

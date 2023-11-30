@@ -11,8 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('cylinder_capacities', function (Blueprint $table) {
-            $table->string('description');
+        Schema::create('subscriptions', function (Blueprint $table){
+            $table->id();
+            $table->foreignId('plans_id');
+            $table->string('email');
+            $table->timestamps();
         });
     }
 
@@ -21,8 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('cylinder_capacities', function (Blueprint $table) {
-            $table->dropColumn('description');
-        });
+        Schema::dropIfExists('subscriptions');
     }
 };

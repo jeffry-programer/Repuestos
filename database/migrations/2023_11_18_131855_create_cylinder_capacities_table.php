@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('cylinder_capacities', function (Blueprint $table) {
             $table->id();
+            $table->string('description', 45);
             $table->timestamps();
         });
     }

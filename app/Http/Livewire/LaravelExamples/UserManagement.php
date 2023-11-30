@@ -9,6 +9,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
 use lluminate\Filesystem\Filesystem;
@@ -70,6 +71,7 @@ class UserManagement extends Component
                     if($count == 0){
                         $query .= "'".$data[$field]."'";
                     }else{
+                        if($field == 'password') $data[$field] = Hash::make($data[$field]);
                         $query .= ",'".$data[$field]."'";
                     }
                     $count++;
@@ -91,7 +93,7 @@ class UserManagement extends Component
         $count = 0;
         $image = false;
         foreach($atributes as $field){
-            if($field != 'created_at' && $field != 'updated_at' && $field != 'id'){
+            if($field != 'created_at' && $field != 'updated_at' && $field != 'id' && $field != 'email_verified_at' && $field != 'remember_token'){
                 if($count == 0){
                     $query .= $field;
                 }else{
@@ -103,7 +105,7 @@ class UserManagement extends Component
         $query .= ',created_at) values (';
         $count = 0;
         foreach($atributes as $field){
-            if($field != 'id' && $field != 'created_at' && $field != 'updated_at'){
+            if($field != 'id' && $field != 'created_at' && $field != 'updated_at' && $field != 'email_verified_at' && $field != 'remember_token'){
                 if($field == 'image'){
                     $image = true;
                     $data[$field] = '';
@@ -112,6 +114,7 @@ class UserManagement extends Component
                     if($count == 0){
                         $query .= "'".$data[$field]."'";
                     }else{
+                        if($field == 'password') $data[$field] = Hash::make($data[$field]);
                         $query .= ",'".$data[$field]."'";
                     }
                     $count++;
@@ -133,6 +136,9 @@ class UserManagement extends Component
             AditionalPicturesProduct::where('products_id', $request->id)->delete();
             $pathDirectory = "public/images-prod/$request->id";
             Storage::deleteDirectory($pathDirectory);
+        }else if($name_table == 'users'){
+            $pathDirectory = "public/images-user/$request->id";
+            Storage::deleteDirectory($pathDirectory);
         }
         session()->flash('message', 'Registro eliminado exitosamente!!');
         return redirect('/table-management/'.str_replace(' ','_', $request->label));
@@ -149,6 +155,7 @@ class UserManagement extends Component
                 if($count == 0){
                     $query .= "$field = '".$data[$field]."' ";
                 }else{
+                    if($field == 'password') $data[$field] = Hash::make($data[$field]);
                     $query .= ", $field = '".$data[$field]."' ";
                 }
                 $count++;
@@ -167,11 +174,12 @@ class UserManagement extends Component
         $query = 'update '.$name_table. ' set ';
         $count = 0;
         foreach($atributes as $field){
-            if($field != 'created_at' && $field != 'updated_at' && $field != 'id'){
+            if($field != 'created_at' && $field != 'updated_at' && $field != 'id' && $field != 'email_verified_at' && $field != 'remember_token'){
                 if($count == 0){
                     $query .= "$field = '".$data[$field]."' ";
                 }else{
                     if($field !== 'image'){
+                        if($field == 'password') $data[$field] = Hash::make($data[$field]);
                         $query .= ", $field = '".$data[$field]."' ";
                     }
                 }
@@ -188,34 +196,52 @@ class UserManagement extends Component
             'file' => 'required|image|max:2048'
         ]);
 
-        $route_image = $request->file('file')->store('public/images-prod/'.$request->id);
+        if($request->table == 'products'){
+            $route_image = $request->file('file')->store('public/images-prod/'.$request->id);
+        }else{
+            $route_image = $request->file('file')->store('public/images-user/'.$request->id);
+        }
+
 
         $url = Storage::url($route_image);
 
         $image = DB::table($request->table)->find($request->id);
 
-        if($image->image == ''){
+        if($request->table == 'products'){
+            if($image->image == ''){
+                $query = "update $request->table set image = '$url' where id = $request->id";
+                DB::update($query);
+            }else{
+                $image = new AditionalPicturesProduct();
+                $image->products_id = $request->id;
+                $image->image = $url;
+                $image->created_at = Carbon::now();
+                $image->save();
+            }
+        }else{
+            $image->nameImg = str_replace('/storage', 'public', $request->nameImg);
+            Storage::delete($image->nameImg);
             $query = "update $request->table set image = '$url' where id = $request->id";
             DB::update($query);
-        }else{
-            $image = new AditionalPicturesProduct();
-            $image->products_id = $request->id;
-            $image->image = $url;
-            $image->created_at = Carbon::now();
-            $image->save();
         }
     }
 
     public function deleteImg(Request $request){
         $name_table = Table::where('label', $request->label)->first()->name;
         $image = DB::table($name_table)->find($request->id)->image;
-        if($image == $request->nameImg){
+        if($request->table == 'products'){
+            if($image == $request->nameImg){
+                $query = "update $name_table set image = '' where id = $request->id";
+                DB::update($query);
+            }else{
+                AditionalPicturesProduct::where('image',$request->nameImg)->delete();
+            }
+        }else{
             $query = "update $name_table set image = '' where id = $request->id";
             DB::update($query);
-        }else{
-            AditionalPicturesProduct::where('image',$request->nameImg)->delete();
         }
+
         $request->nameImg = str_replace('/storage', 'public', $request->nameImg);
-        Storage::delete($request->nameImg);
+        Storage::delete($request->nameImg);   
     }       
 }
