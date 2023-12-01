@@ -50,7 +50,7 @@
                             <thead>
                                 <tr>
                                     @foreach ($atributes as $field)
-                                        @if($field != 'updated_at' && $field != 'email_verified_at' && $field != 'remember_token' && $field != 'about')
+                                        @if($field != 'updated_at' && $field != 'email_verified_at' && $field != 'remember_token')
                                             <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
                                                 {{__($field)}}
                                             </th>
@@ -65,15 +65,16 @@
                                 @foreach ($data as $key)
                                     <tr>
                                         @foreach ($atributes as $field)
-                                            @if($field != 'updated_at' && $field != 'email_verified_at' && $field != 'remember_token' && $field != 'about')
+                                            @if($field != 'updated_at' && $field != 'email_verified_at' && $field != 'remember_token')
                                                 @if(str_contains($field, '_id'))
                                                     @foreach ($extra_data[$field]['values'] as $value)
                                                         @foreach ($extra_data[$field]['fields'] as $field2)
-                                                            @if($field2 != 'created_at' && $field2 != 'updated_at' && $field2 != 'id')
+                                                            @if($field2 == 'email' || $field2 == 'name' || $field2 == 'description')
                                                                 @if($value->id == $key->$field && !str_contains($field2, '_id'))
                                                                     <td class="ps-4">
                                                                         <p class="text-xs font-weight-bold mb-0">{{$value->$field2}}</p>
                                                                     </td> 
+                                                                    @break
                                                                 @endif
                                                             @endif
                                                         @endforeach
@@ -157,7 +158,15 @@
 
 </div>
 
-<?php $maxFiles = $label == 'Productos' ? '5' : '1' ?>
+<?php 
+    if($label == 'Productos'){
+        $maxFiles = 5;
+    }else if($label == 'Tiendas'){
+        $maxFiles = 2;
+    }else{
+        $maxFiles = 1;
+    }
+?>
 
 <input type="hidden" id="maxFiles" value="<?php echo $maxFiles; ?>">
 
@@ -181,16 +190,20 @@
                                 <select class="form-select" name="{{$field}}">
                                     @foreach ($extra_data[$field]['values'] as $value)
                                         @foreach ($extra_data[$field]['fields'] as $field2)
-                                            @if($field2 != 'created_at' && $field2 != 'updated_at' && $field2 != 'id' && !str_contains($field2, '_id'))
+                                            @if($field2 == 'email' || $field2 == 'name' || $field2 == 'description')
                                                 <option value="{{$value->id}}">{{$value->$field2}}</option>
+                                                @break
                                             @endif
                                         @endforeach
                                     @endforeach
                                 </select>
+                            @elseif(str_contains($field, 'date'))
+                                <label for="">{{__($field)}}</label>
+                                <input type="date" name="{{$field}}" required class="form-control" placeholder="{{__('enter a')}} {{__($field)}}">
                             @elseif($field == 'password')
                                 <label>{{__($field)}}</label>
                                 <input type="password" name="{{$field}}" required class="form-control" placeholder="{{__('enter a')}} {{__($field)}}">
-                            @elseif($field == 'image')
+                            @elseif($field == 'image' || $field == 'image2')
                                 <?php $image = true; ?>
                             @elseif($field == 'gender')
                                 <label>{{__($field)}}</label>
@@ -264,16 +277,20 @@
                                 <select class="form-select" name="{{$field}}" id="{{$field}}">
                                     @foreach ($extra_data[$field]['values'] as $value)
                                         @foreach ($extra_data[$field]['fields'] as $field2)
-                                            @if($field2 != 'created_at' && $field2 != 'updated_at' && $field2 != 'id' && !str_contains($field2, '_id'))
+                                            @if($field2 == 'email' || $field2 == 'name' || $field2 == 'description')
                                                 <option value="{{$value->id}}">{{$value->$field2}}</option>
+                                                @break
                                             @endif
                                         @endforeach
                                     @endforeach
                                 </select>
+                                @elseif(str_contains($field, 'date'))
+                                    <label for="">{{__($field)}}</label>
+                                    <input type="date" name="{{$field}}" id="{{$field}}" required class="form-control" placeholder="{{__('enter a')}} {{__($field)}}">
                                 @elseif($field == 'password')
                                     <label>{{__($field)}}</label>
                                     <input type="password" id="{{$field}}" name="{{$field}}" class="form-control" placeholder="Ingrese solo si desea cambiarla">
-                                @elseif($field == 'image')
+                                @elseif($field == 'image' || $field == 'image2')
                                     <?php $image = true; ?>
                                 @elseif($field == 'phone')
                                     <label>{{__($field)}}</label>
@@ -374,20 +391,22 @@
             array.shift();
             var arrayImagenes = [];
             fields.forEach((key, index) => {
+                if(key.includes('password')) return false;
                 if(key.includes('image')){
                     arrayImagenes.push(array[index]);
-                }else if(key.includes('password')){
-
+                }else if(key.includes('date')){
+                    $(`#${key}`).val(array[index].split(' ')[0]);
                 }else{
                     $(`#${key}`).val(array[index]);
                 }
             });
 
+
             if(arrayImagenes.length > 0){
                 var arrayImagenes = arrayImagenes.concat(array.at(-1).replaceAll('images:','').split('|'));
                 var plantilla = '';
                 arrayImagenes.forEach((key) => {
-                    if(key != ''){
+                    if(key != '' && key.includes('images')){
                         key = key.replaceAll('/storage','storage');
                         nameImg = key;
                         plantilla += `<div class="col-12 col-md-4" style="position: relative;margin-top: 1rem;"><img src="{{asset('${nameImg}')}}" style="width: 9.5rem;height: 6.5rem;" alt=""><a style="cursor:pointer" onclick="deleteImg('${nameImg}');"><img src="{{asset('/storage/x.png')}}" alt="" style="position: absolute;width: 1rem;left: 9.25rem;"></a></div>`;
@@ -414,7 +433,11 @@
             headers: {
                 'X-CSRF-TOKEN' : "{{csrf_token()}}",
             },
-            dictDefaultMessage: "Arrastre o haga click para agregar imágenes",
+            dictDefaultMessage: `Arrastre o haga click para agregar imágenes <br>(máximo de imágenes: ${$("#maxFiles").val()})`,
+            dictMaxFilesExceeded: "No puedes subir más archivos",
+            dictCancelUpload: "Cancelar subida",
+            dictInvalidFileType: "No puedes subir archivos de este tipo",
+            dictRemoveFile: "Remover archivo",
             acceptedFiles: 'image/*',
             maxFilesize : 5,
             maxFiles: $("#maxFiles").val(),
@@ -444,7 +467,11 @@
             headers: {
                 'X-CSRF-TOKEN' : "{{csrf_token()}}",
             },
-            dictDefaultMessage: "Arrastre o haga click para agregar imágenes",
+            dictDefaultMessage: `Arrastre o haga click para agregar imágenes <br>(máximo de imágenes: ${$("#maxFiles").val()})`,
+            dictMaxFilesExceeded: "No puedes subir más archivos",
+            dictCancelUpload: "Cancelar subida",
+            dictInvalidFileType: "No puedes subir archivos de este tipo",
+            dictRemoveFile: "Remover archivo",
             acceptedFiles: 'image/*',
             maxFilesize : 5,
             maxFiles: $("#maxFiles").val(),
@@ -660,12 +687,17 @@
                     plantilla = plantilla.replaceAll(plantillaRemplazar, '');
                     $("#row-img-update").html(plantilla);
                     $("#row-img-update").show();
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 3000);
+
                     Swal.fire({
-                        title: "Imágen eliminada exitosamente",
-                        showCancelButton: true,
+                        toast: true,
+                        position: 'center',
                         icon: 'success',
-                        confirmButtonText: "Aceptar",
-                        cancelButtonText: `Cancelar`
+                        showConfirmButton: false,
+                        title: "Imágen eliminada exitosamente",
+                        timer: 3000
                     });
                 }
             });

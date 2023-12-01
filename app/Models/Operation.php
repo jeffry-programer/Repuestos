@@ -5,8 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Publicy extends Model
+class Operation extends Model
 {
-    public $table = 'publicities';
     use HasFactory;
 }

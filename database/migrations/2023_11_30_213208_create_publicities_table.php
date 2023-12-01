@@ -11,20 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('stores', function (Blueprint $table) {
+        Schema::create('publicities', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('plans_id');
-            $table->foreignId('type_stores_id');
-            $table->foreignId('users_id');
-            $table->foreignId('cities_id');
-            $table->string('name', 45)->unique();
-            $table->string('description', 100);
-            $table->string('email', 45)->unique();
-            $table->string('address');
+            $table->foreignId('stores_id');
+            $table->foreignId('type_publicities_id');
             $table->string('image');
-            $table->string('image2');
+            $table->string('description', 45);
             $table->string('link');
             $table->boolean('status');
+            $table->timestamp('date_init')->nullable();
+            $table->timestamp('date_end')->nullable();;
             $table->timestamps();
         });
     }
@@ -34,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('stores');
+        Schema::dropIfExists('publicities');
     }
 };

@@ -3,8 +3,20 @@
 namespace App\Http\Livewire\LaravelExamples;
 
 use App\Models\AditionalPicturesProduct;
+use App\Models\AttentionTime;
+use App\Models\Branch;
+use App\Models\City;
+use App\Models\Municipality;
 use App\Models\Product;
+use App\Models\ProductStore;
+use App\Models\ProfileOperation;
+use App\Models\Promotion;
+use App\Models\Publicy;
+use App\Models\State;
+use App\Models\Store;
+use App\Models\SubCategory;
 use App\Models\Table;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
@@ -29,7 +41,6 @@ class UserManagement extends Component
         }else{
             $data = DB::table($name_table)->get();
         }
-        $label = Table::where('name',$name_table)->first()->label;
         $atributes = Schema::getColumnListing($name_table);
         $extra_data = [];
         foreach($atributes as $field){
@@ -39,7 +50,7 @@ class UserManagement extends Component
                 $extra_data[$field]['values'] = DB::table($table)->get();
             }
         }
-        return view('livewire.laravel-examples.user-management', ['data' => $data, 'label' => $label, 'atributes' => $atributes, 'extra_data' => $extra_data]);
+        return view('livewire.laravel-examples.user-management', ['data' => $data, 'label' => $name_label, 'atributes' => $atributes, 'extra_data' => $extra_data]);
     }
 
     public function store(Request $request){
@@ -91,7 +102,6 @@ class UserManagement extends Component
         $data = $request->all();
         $query = 'insert into '.$name_table. ' (';
         $count = 0;
-        $image = false;
         foreach($atributes as $field){
             if($field != 'created_at' && $field != 'updated_at' && $field != 'id' && $field != 'email_verified_at' && $field != 'remember_token'){
                 if($count == 0){
@@ -106,8 +116,7 @@ class UserManagement extends Component
         $count = 0;
         foreach($atributes as $field){
             if($field != 'id' && $field != 'created_at' && $field != 'updated_at' && $field != 'email_verified_at' && $field != 'remember_token'){
-                if($field == 'image'){
-                    $image = true;
+                if($field == 'image' || $field == 'image2'){
                     $data[$field] = '';
                 } 
                 if($data[$field] != $request->label && $data[$field] != $request->_token){
@@ -130,6 +139,151 @@ class UserManagement extends Component
 
     public function delete(Request $request){
         $name_table = Table::where('label', $request->label)->first()->name;
+        return $this->validateTablesDelete($request, $name_table);
+    }
+
+    public function validateTablesDelete(Request $request, $name_table){
+        $error = false;
+        if($name_table == 'categories'){
+            if(count(SubCategory::where('categories_id', $request->id)->get()) > 0){
+                $error = true;
+            }
+        }
+        if($name_table == 'sub_categories'){
+            if(count(Product::where('sub_categories_id', $request->id)->get()) > 0){
+                $error = true;
+            }
+        }
+        if($name_table == 'brands'){
+            if(count(Product::where('brands_id', $request->id)->get()) > 0){
+                $error = true;
+            }
+        }
+        if($name_table == 'profiles'){
+            if(count(User::where('profiles_id', $request->id)->get()) > 0){
+                $error = true;
+            }
+
+            if(count(ProfileOperation::where('profiles_id', $request->id)->get()) > 0){
+                $error = true;
+            }
+        }
+        if($name_table == 'operations'){
+            if(count(ProfileOperation::where('operations_id', $request->id)->get()) > 0){
+                $error = true;
+            }
+        }
+        if($name_table == 'type_stores'){
+            if(count(Store::where('type_stores_id', $request->id)->get()) > 0){
+                $error = true;
+            }
+        }
+        if($name_table == 'type_stores'){
+            if(count(Store::where('type_stores_id', $request->id)->get()) > 0){
+                $error = true;
+            }
+        }
+        if($name_table == 'cylinder_capacities'){
+            if(count(Product::where('cylinder_capacities_id', $request->id)->get()) > 0){
+                $error = true;
+            }
+        }
+        if($name_table == 'models'){
+            if(count(Product::where('models_id', $request->id)->get()) > 0){
+                $error = true;
+            }
+        }
+        if($name_table == 'boxes'){
+            if(count(Product::where('boxes_id', $request->id)->get()) > 0){
+                $error = true;
+            }
+        }
+        if($name_table == 'type_products'){
+            if(count(Product::where('type_products_id', $request->id)->get()) > 0){
+                $error = true;
+            }
+        }
+        if($name_table == 'countries'){
+            if(count(State::where('countries_id', $request->id)->get()) > 0){
+                $error = true;
+            }
+        }
+        if($name_table == 'states'){
+            if(count(Municipality::where('states_id', $request->id)->get()) > 0){
+                $error = true;
+            }
+        }
+        if($name_table == 'municipalities'){
+            if(count(City::where('municipalities_id', $request->id)->get()) > 0){
+                $error = true;
+            }
+        }
+        if($name_table == 'cities'){
+            if(count(User::where('cities_id', $request->id)->get()) > 0){
+                $error = true;
+            }
+            if(count(Store::where('cities_id', $request->id)->get()) > 0){
+                $error = true;
+            }
+        }
+
+        if($name_table == 'plans'){
+            if(count(Store::where('plans_id', $request->id)->get()) > 0){
+                $error = true;
+            }
+        }
+
+        if($name_table == 'stores' || $name_table == 'days'){
+            if(count(AttentionTime::where('stores_id', $request->id)->get()) > 0){
+                $error = true;
+            }
+
+            if(count(AttentionTime::where('days_id', $request->id)->get()) > 0){
+                $error = true;
+            }
+        }
+
+        if($name_table == 'stores'){
+            if(count(Branch::where('stores_id', $request->id)->get()) > 0){
+                $error = true;
+            } 
+        }
+
+        if($name_table == 'cities'){
+            if(count(Branch::where('cities_id', $request->id)->get()) > 0){
+                $error = true;
+            } 
+        }
+
+        if($name_table == 'stores' || $name_table == 'products'){
+            if(count(ProductStore::where('stores_id', $request->id)->get()) > 0){
+                $error = true;
+            }
+            if(count(ProductStore::where('products_id', $request->id)->get()) > 0){
+                $error = true;
+            }
+        }
+        if($name_table == 'type_publicities'){
+            if(count(Publicy::where('type_publicities_id', $request->id)->get()) > 0){
+                $error = true;
+            }
+        }
+
+        if($name_table == 'product_stores'){
+            if(count(Promotion::where('product_stores_id', $request->id)->get()) > 0){
+                $error = true;
+            }
+        }
+        
+        if($error){
+            session()->flash('message', 'Este registro tiene sub-registros asociados, debe eliminarlos primero');
+            return redirect('/table-management/'.str_replace(' ','_', $request->label));
+        }
+        
+        return $this->finalDelete($request, $name_table);
+    }
+
+    public function finalDelete(Request $request, $name_table){
         $query = "delete from $name_table where id = $request->id";
         DB::delete($query);
         if($name_table == 'products'){
@@ -138,6 +292,9 @@ class UserManagement extends Component
             Storage::deleteDirectory($pathDirectory);
         }else if($name_table == 'users'){
             $pathDirectory = "public/images-user/$request->id";
+            Storage::deleteDirectory($pathDirectory);
+        }else if($name_table == 'stores'){
+            $pathDirectory = "public/images-stores/$request->id";
             Storage::deleteDirectory($pathDirectory);
         }
         session()->flash('message', 'Registro eliminado exitosamente!!');
@@ -178,7 +335,7 @@ class UserManagement extends Component
                 if($count == 0){
                     $query .= "$field = '".$data[$field]."' ";
                 }else{
-                    if($field !== 'image'){
+                    if($field !== 'image' && $field !== 'image2'){
                         if($field == 'password') $data[$field] = Hash::make($data[$field]);
                         $query .= ", $field = '".$data[$field]."' ";
                     }
@@ -198,6 +355,14 @@ class UserManagement extends Component
 
         if($request->table == 'products'){
             $route_image = $request->file('file')->store('public/images-prod/'.$request->id);
+        }else if($request->table == 'stores'){
+            $route_image = $request->file('file')->store('public/images-stores/'.$request->id);
+        }else if($request->table == 'social_networks'){
+            $route_image = $request->file('file')->store('public/images-social/'.$request->id);
+        }else if($request->table == 'social_networks'){
+            $route_image = $request->file('file')->store('public/images-social/'.$request->id);
+        }else if($request->table == 'publicity'){
+            $route_image = $request->file('file')->store('public/images-publicity/'.$request->id);
         }else{
             $route_image = $request->file('file')->store('public/images-user/'.$request->id);
         }
@@ -218,6 +383,18 @@ class UserManagement extends Component
                 $image->created_at = Carbon::now();
                 $image->save();
             }
+        }else if($request->table == 'stores'){
+            $store = Store::find($request->id);
+            if($store->image == ''){
+                $query = "update $request->table set image = '$url' where id = $request->id";
+            }else if($store->image2 == ''){
+                $query = "update $request->table set image2 = '$url' where id = $request->id";
+            }else if($store->image != '' && $store->image2 != ''){
+                $image = str_replace('/storage', 'public', $store->image2);
+                Storage::delete($image);  
+                $query = "update $request->table set image = '$url', image2 = '$store->image' where id = $request->id";          
+            }
+            DB::update($query);
         }else{
             $image->nameImg = str_replace('/storage', 'public', $request->nameImg);
             Storage::delete($image->nameImg);
@@ -229,13 +406,20 @@ class UserManagement extends Component
     public function deleteImg(Request $request){
         $name_table = Table::where('label', $request->label)->first()->name;
         $image = DB::table($name_table)->find($request->id)->image;
-        if($request->table == 'products'){
+        if($name_table == 'products'){
             if($image == $request->nameImg){
                 $query = "update $name_table set image = '' where id = $request->id";
                 DB::update($query);
             }else{
                 AditionalPicturesProduct::where('image',$request->nameImg)->delete();
             }
+        }else if($name_table == 'stores'){
+            if($image == $request->nameImg){
+                $query = "update $name_table set image = '' where id = $request->id";
+            }else{
+                $query = "update $name_table set image2 = '' where id = $request->id";
+            }
+            DB::update($query);
         }else{
             $query = "update $name_table set image = '' where id = $request->id";
             DB::update($query);

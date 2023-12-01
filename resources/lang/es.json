@@ -25,7 +25,7 @@
     "categories_id" : "Categorias",
     "sub_categories_id" : "Sub categoria",
     "cylinder_capacities_id" : "Cilindraje",
-    "models_id" : "Modulos",
+    "models_id" : "Modelo",
     "boxes_id" : "Caja",
     "type_products_id" : "Tipo producto",
     "brands_id" : "Marca",
@@ -56,5 +56,18 @@
     "hour_init_m" : "Hora inicio mañana",
     "hour_end_m" : "Hora fin mañana",
     "hour_init_t" : "Hora inicio tarde",
-    "hour_end_t" : "Hora fin tarde"
+    "hour_end_t" : "Hora fin tarde",
+    "price" : "precio",
+    "plans_id" : "Plan",
+    "image2" : "Imagen 2",
+    "stores_id" : "Tienda",
+    "schedule" : "Horario",
+    "products_id" : "Producto",
+    "amount" : "Cantidad",
+    "amount_days" : "Cantidad dias",
+    "type_publicities_id" : "Tipo publicidad",
+    "date_init" : "Fecha de inicio",
+    "date_end" : "Fecha fin",
+    "modules_id" : "Modulo",
+    "operations_id" : "Operaciones"
 }

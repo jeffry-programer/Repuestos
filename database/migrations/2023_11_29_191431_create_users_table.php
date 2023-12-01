@@ -17,9 +17,9 @@ class CreateUsersTable extends Migration
             $table->id();
             $table->foreignId('profiles_id');
             $table->foreignId('cities_id');
+            $table->string('email')->unique();
             $table->string('name', 50);
             $table->string('last_name', 50);
-            $table->string('email')->unique();
             $table->timestamp('email_verified_at');
             $table->string('password');
             $table->string('phone', 14)->nullable();

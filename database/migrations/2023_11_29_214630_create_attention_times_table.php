@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('attention_times', function (Blueprint $table) {
             $table->id();
             $table->foreignId('days_id');
-            $table->foreignId('store_id');
+            $table->foreignId('stores_id');
             $table->string('schedule', 10);
             $table->timestamps();
         });
