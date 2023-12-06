@@ -7,6 +7,7 @@ use App\Models\AttentionTime;
 use App\Models\Branch;
 use App\Models\City;
 use App\Models\Municipality;
+use App\Models\Plan;
 use App\Models\Product;
 use App\Models\ProductStore;
 use App\Models\ProfileOperation;
@@ -53,8 +54,64 @@ class UserManagement extends Component
         return view('livewire.laravel-examples.user-management', ['data' => $data, 'label' => $name_label, 'atributes' => $atributes, 'extra_data' => $extra_data]);
     }
 
+    public function searchData(Request $request){
+        if($request->table == 'users'){
+            return json_encode(DB::table($request->table)->where('email', 'like',$request->value.'%')->select('id','email')->get());
+        }else{
+            return json_encode(DB::table($request->table)->where('name', 'like',$request->value.'%')->select('id','name')->get());
+        }
+    }
+
+    public function validateRequest(Request $request, $name_table){
+        $error = false;
+        if(isset($request->name)){
+            if(strlen($request->name) > 40){
+                $error = true;
+            }
+        }
+        if(isset($request->description)){
+            if($name_table == 'products' || $name_table == 'stores'){
+                if(strlen($request->description) > 100){
+                    $error = true;
+                }
+            }else{
+                if(strlen($request->description) > 45){
+                    $error = true;
+                }
+            }
+        }
+        return $error;
+    }
+
+    public function validateExist(Request $request, $name_table){
+        $error = false;
+        if(isset($request->name)){
+            if(count(DB::table($name_table)->where('name',$request->name)->get()) > 0){
+                $error = true;
+            }
+        }
+        if(isset($request->description)){
+            if($name_table != 'products' && $name_table != 'stores'){
+                if(count(DB::table($name_table)->where('description',$request->description)->get()) > 0){
+                    $error = true;
+                }
+            }
+        }
+        return $error;
+    }
+
     public function store(Request $request){
         $name_table = Table::where('label', $request->label)->first()->name;
+        $validate = $this->validateRequest($request, $name_table);
+        if($validate){
+            session()->flash('message', 'Has ingresado un valor demasiado grande!!');
+            return redirect('/table-management/'.str_replace(' ','_', $request->label));
+        }
+        $validate =  $this->validateExist($request, $name_table);
+        if($validate){
+            session()->flash('message', 'Este registro ya existe');
+            return redirect('/table-management/'.str_replace(' ','_', $request->label));
+        }
         $atributes = Schema::getColumnListing($name_table);
         $data = $request->all();
         $query = 'insert into '.$name_table. ' (';
@@ -82,6 +139,10 @@ class UserManagement extends Component
                     if($count == 0){
                         $query .= "'".$data[$field]."'";
                     }else{
+                        if($request->label == 'Plan contratado' && $field == 'date_end'){
+                            $days_plan = Plan::find($request->plans_id)->first()->days;
+                            $data[$field] = Carbon::parse($request->date_init)->addDay($days_plan);
+                        }
                         if($field == 'password') $data[$field] = Hash::make($data[$field]);
                         $query .= ",'".$data[$field]."'";
                     }
@@ -98,6 +159,14 @@ class UserManagement extends Component
 
     public function store2(Request $request){
         $name_table = Table::where('label', $request->label)->first()->name;
+        $validate = $this->validateRequest($request, $name_table);
+        if($validate){
+            abort(404);
+        }
+        $validate =  $this->validateExist($request, $name_table);
+        if($validate){
+            abort(404);
+        }
         $atributes = Schema::getColumnListing($name_table);
         $data = $request->all();
         $query = 'insert into '.$name_table. ' (';
@@ -124,6 +193,7 @@ class UserManagement extends Component
                         $query .= "'".$data[$field]."'";
                     }else{
                         if($field == 'password') $data[$field] = Hash::make($data[$field]);
+                        if($field == 'link') $data[$field] = str_replace(' ','-', $data['name']);
                         $query .= ",'".$data[$field]."'";
                     }
                     $count++;
@@ -303,6 +373,29 @@ class UserManagement extends Component
 
     public function update(Request $request){
         $name_table = Table::where('label', $request->label)->first()->name;
+        $validate = $this->validateRequest($request, $name_table);
+        if($validate){
+            session()->flash('message', 'Has ingresado un valor demasiado grande!!');
+            return redirect('/table-management/'.str_replace(' ','_', $request->label));
+        }
+        if(isset($request->name)){
+            if(DB::table($name_table)->find($request->id)->name !== $request->name){
+                $validate = $this->validateExist($request, $name_table);
+                if($validate){
+                    session()->flash('message', 'Este registro ya existe');
+                    return redirect('/table-management/'.str_replace(' ','_', $request->label));
+                }
+            }
+        }
+        if(isset($request->description)){
+            if(DB::table($name_table)->find($request->id)->description !== $request->description){
+                $validate = $this->validateExist($request, $name_table);
+                if($validate){
+                    session()->flash('message', 'Este registro ya existe');
+                    return redirect('/table-management/'.str_replace(' ','_', $request->label));
+                }
+            }
+        }
         $atributes = Schema::getColumnListing($name_table);
         $data = $request->all();
         $query = 'update '.$name_table. ' set ';
@@ -312,6 +405,10 @@ class UserManagement extends Component
                 if($count == 0){
                     $query .= "$field = '".$data[$field]."' ";
                 }else{
+                    if($request->label == 'Plan contratado' && $field == 'date_end'){
+                        $days_plan = Plan::find($request->plans_id)->first()->days;
+                        $data[$field] = Carbon::parse($request->date_init)->addDay($days_plan);
+                    }
                     if($field == 'password') $data[$field] = Hash::make($data[$field]);
                     $query .= ", $field = '".$data[$field]."' ";
                 }
@@ -326,6 +423,26 @@ class UserManagement extends Component
 
     public function update2(Request $request){
         $name_table = Table::where('label', $request->label)->first()->name;
+        $validate = $this->validateRequest($request, $name_table);
+        if($validate){
+            abort(404);
+        }
+        if(isset($request->name)){
+            if(DB::table($name_table)->find($request->id)->name !== $request->name){
+                $validate = $this->validateExist($request, $name_table);
+                if($validate){
+                    abort(404);
+                }
+            }
+        }
+        if(isset($request->description)){
+            if(DB::table($name_table)->find($request->id)->description !== $request->description){
+                $validate = $this->validateExist($request, $name_table);
+                if($validate){
+                    abort(404);
+                }
+            }
+        }
         $atributes = Schema::getColumnListing($name_table);
         $data = $request->all();
         $query = 'update '.$name_table. ' set ';
@@ -377,7 +494,11 @@ class UserManagement extends Component
                 $query = "update $request->table set image = '$url' where id = $request->id";
                 DB::update($query);
             }else{
-                $image = new AditionalPicturesProduct();
+                $count = count(AditionalPicturesProduct::find($request->id)->get());
+                if($count == 4){
+                    return false;
+                }
+                $image = new AditionalPicturesProduct($request->id);
                 $image->products_id = $request->id;
                 $image->image = $url;
                 $image->created_at = Carbon::now();

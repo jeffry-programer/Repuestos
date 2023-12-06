@@ -77,7 +77,7 @@ class DatabaseSeeder extends Seeder
             ],
             [
                 'name' => 'sub_categories',
-                'label' => 'Sub categorias',  
+                'label' => 'Subcategorias',  
                 'type' => '1',
                 'created_at' => now()
             ],
@@ -173,14 +173,14 @@ class DatabaseSeeder extends Seeder
             ],
             [
                 'name' => 'plans',
-                'label' => 'Plan',  
+                'label' => 'Tipo plan',  
                 'type' => '1',
                 'created_at' => now()
             ],
             [
                 'name' => 'stores',
                 'label' => 'Tiendas',  
-                'type' => '1',
+                'type' => '3',
                 'created_at' => now()
             ],
             [
@@ -234,6 +234,12 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'operations',
                 'label' => 'Operaciones',  
+                'type' => '1',
+                'created_at' => now()   
+            ],
+            [
+                'name' => 'plan_contractings',
+                'label' => 'Plan contratado',  
                 'type' => '1',
                 'created_at' => now()   
             ]

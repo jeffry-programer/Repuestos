@@ -15,6 +15,10 @@
     .ps__rail-x{
         display: none !important;
     }
+
+    .dropzone .dz-preview .dz-error-message {
+        top: 43px !important;
+    }
 </style>
 
 <div class="main-content">
@@ -79,6 +83,16 @@
                                                             @endif
                                                         @endforeach
                                                     @endforeach
+                                                @elseif((str_contains($field, 'status')))
+                                                    @if($key->$field == 0)
+                                                        <td class="ps-4">
+                                                            <p class="text-xs font-weight-bold mb-0">Desactivado</p>
+                                                        </td>         
+                                                    @else
+                                                        <td class="ps-4">
+                                                            <p class="text-xs font-weight-bold mb-0">Activado</p>
+                                                        </td>
+                                                    @endif
                                                 @elseif((str_contains($field, 'hour')))
                                                     <?php 
                                                         $key->$field = date('H:i', strtotime($key->$field));
@@ -183,20 +197,44 @@
                 <div class="card-body">
                     <form action="{{route('table-store')}}" method="POST" autocomplete="off" id="form" autocomplete="off">
                     @csrf
+                    <?php $count_autocomplete = 0; ?>
+                    <?php $data_autocomplete = []; ?>
                     @foreach ($atributes as $field)
                         @if($field != 'created_at' && $field != 'updated_at' && $field != 'id' && $field != 'email_verified_at' && $field != 'remember_token' && $field != 'about')
                             @if(str_contains($field, '_id'))
-                                <label for="">{{__($field)}}</label>
-                                <select class="form-select" name="{{$field}}">
-                                    @foreach ($extra_data[$field]['values'] as $value)
-                                        @foreach ($extra_data[$field]['fields'] as $field2)
-                                            @if($field2 == 'email' || $field2 == 'name' || $field2 == 'description')
-                                                <option value="{{$value->id}}">{{$value->$field2}}</option>
-                                                @break
-                                            @endif
+                                @if($field == 'stores_id' || $field == 'products_id' || $field == 'users_id')
+                                    <label for="">{{__($field)}}</label>
+                                    <input type="text" required class="form-control" data-name="{{$field}}" placeholder="Escriba y seleccione el campo {{__($field)}}" id="autocomplete-{{$field}}">
+                                    <div id="list-{{$field}}"></div>
+                                    
+                                    <input type="hidden" name="{{$field}}">
+                                    <?php 
+                                        $autocomplete = true; 
+                                        $count_autocomplete++;
+
+                                        array_push($data_autocomplete, $field);
+                                    ?>
+                                @else
+                                    <label for="">{{__($field)}}</label>
+                                    <select class="form-select" name="{{$field}}">
+                                        @foreach ($extra_data[$field]['values'] as $value)
+                                            @foreach ($extra_data[$field]['fields'] as $field2)
+                                                @if($field2 == 'email' || $field2 == 'name' || $field2 == 'description')
+                                                    <option value="{{$value->id}}">{{$value->$field2}}</option>
+                                                    @break
+                                                @endif
+                                            @endforeach
                                         @endforeach
-                                    @endforeach
+                                    </select>
+                                @endif
+                            @elseif((str_contains($field, 'status')))
+                                <label for="">{{__($field)}}</label>
+                                <select name="{{$field}}" class="form-select">
+                                    <option value="0">Inactivo</option>
+                                    <option value="1">Activo</option>
                                 </select>
+                            @elseif($label == 'Plan contratado' && $field == 'date_end')
+                                <input type="text" name="{{$field}}" class="d-none" value="">
                             @elseif(str_contains($field, 'date'))
                                 <label for="">{{__($field)}}</label>
                                 <input type="date" name="{{$field}}" required class="form-control" placeholder="{{__('enter a')}} {{__($field)}}">
@@ -217,9 +255,11 @@
                                     <option value="1">Activo</option>
                                     <option value="0">Inactivo</option>
                                 </select>
-                            @elseif($field == 'phone')
+                            @elseif($field == 'link')
+                                <input type="text" name="{{$field}}" class="d-none" value="">
+                            @elseif($field == 'phone' || $field == 'amount' || $field == 'price')
                                 <label>{{__($field)}}</label>
-                                <input type="number" name="{{$field}}" required class="form-control" placeholder="{{__('enter a')}} {{__($field)}}">
+                                <input type="number" min="1" name="{{$field}}" required class="form-control" placeholder="{{__('enter a')}} {{__($field)}}">
                             @elseif($field == 'count')
                                 <label class="d-none">{{__($field)}}</label>
                                 <input type="number" name="{{$field}}" required class="form-control d-none" value="0">
@@ -242,18 +282,33 @@
             </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{__('Close')}}</button>
+          <button type="button" class="btn btn-secondary" style="background:#4d57e1;" data-bs-dismiss="modal">{{__('Close')}}</button>
           <button 
           @if(isset($image))
             type="button" id="store"
           @else
             type="submit"
           @endif
+          @isset($autocomplete)
+            disabled id="save"
+            style="background: #00000029;"
+          @endisset
            class="btn btn-info">{{__('Save changes')}}</button>
         </div>
         </form>
         <input type="hidden" id="id_table">
         <input type="hidden" id="table">
+        @isset($autocomplete)
+            <input type="hidden" id="data-autocomplete" value="<?php 
+            foreach ($data_autocomplete as $index => $key){
+                if($index){
+                    echo ",$key";
+                }else{
+                    echo "$key";
+                }
+            }?>">
+            <input type="hidden" id="count-autocomplete" value="<?php echo $count_autocomplete; ?>">
+        @endisset
       </div>
     </div>
   </div>
@@ -267,23 +322,42 @@
         </div>
         <form action="{{route('table-update')}}" method="POST"  autocomplete="off" id="form-edit">
             @csrf
+            <?php $count_autocomplete = 0; ?>
+            <?php $data_autocomplete = []; ?>
         <div class="modal-body">
             <div class="card" style="width: 74%;left: 16%;">
                 <div class="card-body">
                     @foreach ($atributes as $field)
                         @if($field != 'created_at' && $field != 'updated_at' && $field != 'id' && $field != 'email_verified_at' && $field != 'remember_token' && $field != 'about')
                             @if(str_contains($field, '_id'))
-                                <label for="">{{__($field)}}</label>
-                                <select class="form-select" name="{{$field}}" id="{{$field}}">
-                                    @foreach ($extra_data[$field]['values'] as $value)
-                                        @foreach ($extra_data[$field]['fields'] as $field2)
-                                            @if($field2 == 'email' || $field2 == 'name' || $field2 == 'description')
-                                                <option value="{{$value->id}}">{{$value->$field2}}</option>
-                                                @break
-                                            @endif
-                                        @endforeach
-                                    @endforeach
-                                </select>
+                                @if($field == 'stores_id' || $field == 'products_id' || $field == 'users_id')
+                                        <label for="">{{__($field)}}</label>
+                                        <input type="text" required class="form-control" data-name="{{$field}}" placeholder="Escriba y seleccione el campo {{__($field)}}" id="autocomplete-edit-{{$field}}">
+
+                                        <div id="list-edit-{{$field}}"></div>
+                                        <input type="hidden" name="{{$field}}" id="{{$field}}">
+
+                                        <?php 
+                                            $autocomplete = true; 
+                                            $count_autocomplete++;
+
+                                            array_push($data_autocomplete, $field);
+                                        ?>
+                                    @else
+                                        <label for="">{{__($field)}}</label>
+                                        <select class="form-select" name="{{$field}}" id="{{$field}}">
+                                            @foreach ($extra_data[$field]['values'] as $value)
+                                                @foreach ($extra_data[$field]['fields'] as $field2)
+                                                    @if($field2 == 'email' || $field2 == 'name' || $field2 == 'description')
+                                                        <option value="{{$value->id}}">{{$value->$field2}}</option>
+                                                        @break
+                                                    @endif
+                                                @endforeach
+                                            @endforeach
+                                        </select>
+                                    @endif
+                                @elseif($label == 'Plan contratado' && $field == 'date_end')
+                                    <input type="text" name="{{$field}}" id="{{$field}}">
                                 @elseif(str_contains($field, 'date'))
                                     <label for="">{{__($field)}}</label>
                                     <input type="date" name="{{$field}}" id="{{$field}}" required class="form-control" placeholder="{{__('enter a')}} {{__($field)}}">
@@ -292,6 +366,8 @@
                                     <input type="password" id="{{$field}}" name="{{$field}}" class="form-control" placeholder="Ingrese solo si desea cambiarla">
                                 @elseif($field == 'image' || $field == 'image2')
                                     <?php $image = true; ?>
+                                @elseif($field == 'link')
+                                    <input type="text" name="{{$field}}" id="{{$field}}" class="d-none">
                                 @elseif($field == 'phone')
                                     <label>{{__($field)}}</label>
                                     <input type="number" name="{{$field}}" id="{{$field}}" required class="form-control">
@@ -315,15 +391,29 @@
             </div>
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{__('Close')}}</button>
+            <button type="button" class="btn btn-secondary" style="background:#4d57e1;" data-bs-dismiss="modal">{{__('Close')}}</button>
             <button 
             @if(isset($image))
                 type="button" id="update"
             @else
                 type="submit"
             @endif
+
             class="btn btn-info">{{__('Save changes')}}</button>
         </div>
+
+        @isset($autocomplete)
+            <input type="hidden" id="data-autocomplete-edit" value="<?php 
+            foreach ($data_autocomplete as $index => $key){
+                if($index){
+                    echo ",$key";
+                }else{
+                    echo "$key";
+                }
+            }?>">
+            <input type="hidden" id="count-autocomplete-edit" value="<?php echo $count_autocomplete; ?>">
+        @endisset
+
         <input type="hidden" name="label" value="{{$label}}" id="label">
         <input type="hidden" name="id" id="id">
         </form>
@@ -339,6 +429,73 @@
     <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
     <script src="//cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>  
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    @isset($autocomplete)
+        <script>
+        var arrayAutoComplete =  $("#data-autocomplete").val().split(',');
+        arrayAutoComplete.forEach((key) => {
+            $(`#autocomplete-${key}`).on("keyup", function(){
+                searchData(`${key}`);
+            });
+        });
+
+        var arrayAutoCompleteEdit =  $("#data-autocomplete-edit").val().split(',');
+        arrayAutoCompleteEdit.forEach((key) => {
+            $(`#autocomplete-edit-${key}`).on("keyup", function(){
+                searchData(`edit-${key}`);
+            });
+        });
+
+        function asignId(id, value, field){
+            $(`#list-${field}`).html('');
+            $(`#autocomplete-${field}`).val(value);
+            $(`[name='${$(`#autocomplete-${field}`).data('name')}']`).val(id);
+            $("#count-autocomplete").val(($("#count-autocomplete").val() - 1));
+            if($("#count-autocomplete").val() == 0){
+                if(field.includes('edit')){
+                    $("#updat").removeAttr('disabled');
+                    $("#updat").removeAttr('style');
+                    $("#update").removeAttr('disabled');
+                    $("#update").removeAttr('style');
+                }else{
+                    $("#save").removeAttr('disabled');
+                    $("#save").removeAttr('style');
+                    $("#store").removeAttr('disabled');
+                    $("#store").removeAttr('style');
+                }
+            }
+            return false;
+        }
+
+        function searchData(field){
+            var searchTable = field.replaceAll('_id','');
+            searchTable = searchTable.replaceAll('edit-','');
+            var valueInput = $(`#autocomplete-${field}`).val();
+            $.ajax({
+                url: "{{route('search-data')}}",
+                data: {_token : "{{csrf_token()}}", table : searchTable, value : valueInput},
+                method: "POST",
+                success(data){
+                    var response = JSON.parse(data);
+                    var plantilla = "";
+                    if(response.length > 0 && valueInput != ''){
+                        plantilla += '<div class="row">';
+                        response.forEach((key) => {
+                            if(key.name == null) key.name = key.email;
+                            plantilla += `<div class="d-flex col-12 ms-4 my-2" style="cursor: pointer;font-size: 0.9rem;color: #5e5e5e;" onclick="asignId(${key.id},'${key.name}','${field}')">${key.name}</div>`;
+                        });
+                        plantilla +='</div>';
+                    }
+                    $(`#list-${field}`).html(plantilla);
+                    $(`#list-${field}`).show();
+                },
+                error(err){
+                    console.log(err);
+                }
+            })
+        }
+        </script>
+    @endisset
+   
     <script>
         $('#myTable').DataTable({
             "oLanguage": {
@@ -387,6 +544,7 @@
         }
     
         function editUser(array){
+            console.log(array);
             fields = array[0].split("|");
             array.shift();
             var arrayImagenes = [];
@@ -515,6 +673,7 @@
             data.forEach((key) => {
                 let value = key.split('=')[1];
                 let field = key.split('=')[0];
+                if(field.includes('link')) return false;
                 if(value == null || value == ''){
                     boolean = false;
                 }

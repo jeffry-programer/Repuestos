@@ -1,8 +1,8 @@
 {
-    "name" : "nombre",
-    "created_at" : "fecha de creación",
-    "description" : "descripción",
-    "actions" : "acciones",
+    "name" : "Nombre",
+    "created_at" : "Fecha de creación",
+    "description" : "Descripción",
+    "actions" : "Acciones",
     "Add new" : "Agregar",
     "Search" : "Buscar",
     "No records available" : "No se consiguieron registros",
@@ -57,7 +57,7 @@
     "hour_end_m" : "Hora fin mañana",
     "hour_init_t" : "Hora inicio tarde",
     "hour_end_t" : "Hora fin tarde",
-    "price" : "precio",
+    "price" : "Precio",
     "plans_id" : "Plan",
     "image2" : "Imagen 2",
     "stores_id" : "Tienda",
@@ -69,5 +69,9 @@
     "date_init" : "Fecha de inicio",
     "date_end" : "Fecha fin",
     "modules_id" : "Modulo",
-    "operations_id" : "Operaciones"
+    "operations_id" : "Operaciones",
+    "Dont have an account?" : "¿No tienes una cuenta?",
+    "days" : "Dias",
+    "plan_contractings_id" : "Plan",
+    "product_stores_id":"Producto"
 }

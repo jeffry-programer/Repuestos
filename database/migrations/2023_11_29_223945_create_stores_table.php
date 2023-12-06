@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('stores', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('plans_id');
             $table->foreignId('type_stores_id');
             $table->foreignId('users_id');
             $table->foreignId('cities_id');
@@ -23,6 +22,7 @@ return new class extends Migration
             $table->string('address');
             $table->string('image');
             $table->string('image2');
+            $table->string('RIF', 45);
             $table->string('link');
             $table->boolean('status');
             $table->timestamps();
