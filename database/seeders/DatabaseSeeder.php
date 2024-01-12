@@ -66,7 +66,7 @@ class DatabaseSeeder extends Seeder
             ]
         ];
 
-        DB::table('users')->insert($array);
+        //DB::table('users')->insert($array);
 
         $array = [
             [

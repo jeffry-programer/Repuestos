@@ -18,6 +18,8 @@
 
     .dropzone .dz-preview .dz-error-message {
         top: 43px !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
     }
 </style>
 
@@ -736,7 +738,7 @@
         
         function hideAlertTime(){
             setTimeout(() => {
-                window.location.reload();
+                //window.location.reload();
             }, 3000);
 
             Swal.fire({

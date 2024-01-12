@@ -494,11 +494,11 @@ class UserManagement extends Component
                 $query = "update $request->table set image = '$url' where id = $request->id";
                 DB::update($query);
             }else{
-                $count = count(AditionalPicturesProduct::find($request->id)->get());
+                $count = count(AditionalPicturesProduct::where('id', $request->id)->get());
                 if($count == 4){
                     return false;
                 }
-                $image = new AditionalPicturesProduct($request->id);
+                $image = new AditionalPicturesProduct();
                 $image->products_id = $request->id;
                 $image->image = $url;
                 $image->created_at = Carbon::now();
