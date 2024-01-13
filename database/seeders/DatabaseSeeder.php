@@ -49,7 +49,7 @@ class DatabaseSeeder extends Seeder
         DB::table('cities')->insert($array);
 
         
-        $array = [
+        /*$array = [
             [
                 'profiles_id' => 1,
                 'cities_id' => 1,  
@@ -64,7 +64,7 @@ class DatabaseSeeder extends Seeder
                 'remember_token' => Hash::make('password'), 
                 'created_at' => now()
             ]
-        ];
+        ];*/
 
         //DB::table('users')->insert($array);
 

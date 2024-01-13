@@ -25,6 +25,7 @@ return new class extends Migration
             $table->string('RIF', 45);
             $table->string('link');
             $table->boolean('status');
+            $table->string('score_store', 10);
             $table->timestamps();
         });
     }

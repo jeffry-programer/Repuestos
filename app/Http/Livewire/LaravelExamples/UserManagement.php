@@ -44,6 +44,9 @@ class UserManagement extends Component
         }
         $atributes = Schema::getColumnListing($name_table);
         $extra_data = [];
+
+        $atributes = array_diff($atributes, array('current_team_id'));
+
         foreach($atributes as $field){
             if(str_contains($field, '_id')){
                 $table = explode("_id", $field)[0];
@@ -51,6 +54,7 @@ class UserManagement extends Component
                 $extra_data[$field]['values'] = DB::table($table)->get();
             }
         }
+
         return view('livewire.laravel-examples.user-management', ['data' => $data, 'label' => $name_label, 'atributes' => $atributes, 'extra_data' => $extra_data]);
     }
 
@@ -288,7 +292,7 @@ class UserManagement extends Component
                 $error = true;
             }
         }
-        if($name_table == 'cities'){
+        if($name_table == 'cities'){            
             if(count(User::where('cities_id', $request->id)->get()) > 0){
                 $error = true;
             }
@@ -349,6 +353,7 @@ class UserManagement extends Component
             session()->flash('message', 'Este registro tiene sub-registros asociados, debe eliminarlos primero');
             return redirect('/table-management/'.str_replace(' ','_', $request->label));
         }
+
         
         return $this->finalDelete($request, $name_table);
     }

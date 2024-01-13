@@ -738,7 +738,7 @@
         
         function hideAlertTime(){
             setTimeout(() => {
-                //window.location.reload();
+                window.location.reload();
             }, 3000);
 
             Swal.fire({
