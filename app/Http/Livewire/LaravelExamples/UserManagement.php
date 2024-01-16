@@ -194,10 +194,12 @@ class UserManagement extends Component
                 } 
                 if($data[$field] != $request->label && $data[$field] != $request->_token){
                     if($count == 0){
+                        if($field == 'product_stores_id') $data[$field] = ProductStore::where('products_id', $data['products_id'])->where('stores_id', $data['stores_id'])->first()->id;
                         $query .= "'".$data[$field]."'";
                     }else{
                         if($field == 'password') $data[$field] = Hash::make($data[$field]);
                         if($field == 'link') $data[$field] = str_replace(' ','-', $data['name']);
+
                         $query .= ",'".$data[$field]."'";
                     }
                     $count++;

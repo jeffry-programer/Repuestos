@@ -73,5 +73,6 @@
     "Dont have an account?" : "¿No tienes una cuenta?",
     "days" : "Dias",
     "plan_contractings_id" : "Plan",
-    "product_stores_id":"Producto tienda"
+    "product_stores_id":"Producto tienda",
+    "score_store" : "Puntuación"
 }

@@ -13,11 +13,13 @@ return new class extends Migration
     {
         Schema::create('promotions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('product_stores_id');
+            $table->foreignId('products_id');
+            $table->foreignId('stores_id');
             $table->timestamp('date_init')->nullable();
             $table->timestamp('date_end')->nullable();
             $table->float('price', 10, 2);
             $table->string('image');
+            $table->string('description');
             $table->timestamps();
         });
     }

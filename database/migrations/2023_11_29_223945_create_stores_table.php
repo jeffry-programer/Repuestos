@@ -26,6 +26,7 @@ return new class extends Migration
             $table->string('link');
             $table->boolean('status');
             $table->string('score_store', 10);
+            $table->string('phone', 15);
             $table->timestamps();
         });
     }

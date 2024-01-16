@@ -30,6 +30,11 @@ return new class extends Migration
             $table->text('detail');
             $table->timestamps();
         });
+
+        DB::statement('
+            create fulltext index products_name_fulltext
+            on products(name);
+        ');
     }
 
     /**

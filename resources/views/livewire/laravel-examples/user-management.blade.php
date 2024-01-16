@@ -21,6 +21,10 @@
         opacity: 1 !important;
         pointer-events: auto !important;
     }
+
+    .alert-info{
+        color: white !important;
+    }
 </style>
 
 <div class="main-content">
@@ -216,6 +220,23 @@
 
                                         array_push($data_autocomplete, $field);
                                     ?>
+                                @elseif($field == 'product_stores_id')
+                                    <label for="">{{__('products_id')}}</label>
+                                    <input type="text" required class="form-control" data-name="products_id" placeholder="Escriba y seleccione el campo {{__('products_id')}}" id="autocomplete-products_id">
+                                    <div id="list-products_id"></div>
+                                    <input type="hidden" name="products_id">
+                                    <input type="hidden" name="stores_id">
+                                    <label for="">{{__('stores_id')}}</label>
+                                    <input type="text" required class="form-control" data-name="stores_id" placeholder="Escriba y seleccione el campo {{__('stores_id')}}" id="autocomplete-stores_id">
+                                    <div id="list-stores_id"></div>
+                                    
+                                    <input type="hidden" name="{{$field}}">
+                                    <?php 
+                                        $autocomplete = true; 
+                                        $count_autocomplete++;
+
+                                        array_push($data_autocomplete, $field);
+                                    ?>
                                 @else
                                     <label for="">{{__($field)}}</label>
                                     <select class="form-select" name="{{$field}}">
@@ -268,6 +289,9 @@
                             @elseif((str_contains($field, 'hour')))
                                 <label>{{__($field)}}</label>
                                 <input type="time" name="{{$field}}" class="form-control">
+                            @elseif((str_contains($field, 'schedule')))
+                                <label>{{__($field)}}</label>
+                                <textarea name="{{$field}}" class="form-control" placeholder="Ejemplo: De lunes a viernes: 8 am - 5 pm, Sabado: 9 am - 12 pm"></textarea>
                             @else
                                 <label for="">{{__($field)}}</label>
                                 <input type="text" name="{{$field}}" required class="form-control" placeholder="{{__('enter a')}} {{__($field)}}">
@@ -281,6 +305,15 @@
                     </div>
                     @endisset
                 </div>
+            </div>
+            <div>
+
+                @isset($autocomplete)
+        
+                    <div class="alert alert-info mt-3" style="width: 72%;left: 16%;">Para poder guardar el registro debes seleccionar un item por cada autompletado</div>
+        
+                @endisset
+        
             </div>
         </div>
         <div class="modal-footer">
@@ -676,6 +709,7 @@
                 let value = key.split('=')[1];
                 let field = key.split('=')[0];
                 if(field.includes('link')) return false;
+                if(field.includes('product_stores_id')) return false;
                 if(value == null || value == ''){
                     boolean = false;
                 }
