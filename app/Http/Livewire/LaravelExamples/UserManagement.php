@@ -8,6 +8,7 @@ use App\Models\Branch;
 use App\Models\City;
 use App\Models\Municipality;
 use App\Models\Plan;
+use App\Models\PlanContracting;
 use App\Models\Product;
 use App\Models\ProductStore;
 use App\Models\ProfileOperation;
@@ -95,7 +96,7 @@ class UserManagement extends Component
             }
         }
         if(isset($request->description)){
-            if($name_table != 'products' && $name_table != 'stores'){
+            if($name_table != 'products' && $name_table != 'stores' && $name_table != 'publicities'){
                 if(count(DB::table($name_table)->where('description',$request->description)->get()) > 0){
                     $error = true;
                 }
@@ -198,7 +199,12 @@ class UserManagement extends Component
                         $query .= "'".$data[$field]."'";
                     }else{
                         if($field == 'password') $data[$field] = Hash::make($data[$field]);
-                        if($field == 'link') $data[$field] = str_replace(' ','-', $data['name']);
+                        if($field == 'link' && $name_table == 'publicities'){
+                            $link_store = Store::find($data['stores_id'])->link;
+                            $data[$field] = $link_store;
+                        }else if($field == 'link' && $name_table != 'publicities'){
+                            $data[$field] = str_replace(' ','-', $data['name']);
+                        } 
 
                         $query .= ",'".$data[$field]."'";
                     }
@@ -304,7 +310,7 @@ class UserManagement extends Component
         }
 
         if($name_table == 'plans'){
-            if(count(Store::where('plans_id', $request->id)->get()) > 0){
+            if(count(PlanContracting::where('plans_id', $request->id)->get()) > 0){
                 $error = true;
             }
         }

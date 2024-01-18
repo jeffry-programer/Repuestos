@@ -365,19 +365,17 @@
                     @foreach ($atributes as $field)
                         @if($field != 'created_at' && $field != 'updated_at' && $field != 'id' && $field != 'email_verified_at' && $field != 'remember_token' && $field != 'about')
                             @if(str_contains($field, '_id'))
-                                @if($field == 'stores_id' || $field == 'products_id' || $field == 'users_id')
+                                    @if($field == 'stores_id' || $field == 'products_id' || $field == 'users_id')
                                         <label for="">{{__($field)}}</label>
-                                        <input type="text" required class="form-control" data-name="{{$field}}" placeholder="Escriba y seleccione el campo {{__($field)}}" id="autocomplete-edit-{{$field}}">
-
-                                        <div id="list-edit-{{$field}}"></div>
-                                        <input type="hidden" name="{{$field}}" id="{{$field}}">
-
-                                        <?php 
-                                            $autocomplete = true; 
-                                            $count_autocomplete++;
-
-                                            array_push($data_autocomplete, $field);
-                                        ?>
+                                        @foreach ($extra_data[$field]['values'] as $value)
+                                            @foreach ($extra_data[$field]['fields'] as $field2)
+                                                @if($field2 == 'email' || $field2 == 'name' || $field2 == 'description')
+                                                    <input type="text" disabled class="form-control" value="{{$value->$field2}}">
+                                                    <input type="hidden" name="{{$field}}" value="{{$value->id}}">
+                                                    @break
+                                                @endif
+                                            @endforeach
+                                        @endforeach
                                     @else
                                         <label for="">{{__($field)}}</label>
                                         <select class="form-select" name="{{$field}}" id="{{$field}}">
@@ -391,8 +389,14 @@
                                             @endforeach
                                         </select>
                                     @endif
+                                @elseif((str_contains($field, 'status')))
+                                    <label for="">{{__($field)}}</label>
+                                    <select name="{{$field}}" id="{{$field}}" class="form-select">
+                                        <option value="0">Inactivo</option>
+                                        <option value="1">Activo</option>
+                                    </select>
                                 @elseif($label == 'Plan contratado' && $field == 'date_end')
-                                    <input type="text" name="{{$field}}" id="{{$field}}">
+                                    <input type="hidden" name="{{$field}}" id="{{$field}}">
                                 @elseif(str_contains($field, 'date'))
                                     <label for="">{{__($field)}}</label>
                                     <input type="date" name="{{$field}}" id="{{$field}}" required class="form-control" placeholder="{{__('enter a')}} {{__($field)}}">
